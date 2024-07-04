@@ -39,6 +39,9 @@
 </template>
 
 <script>
+import axios from 'axios';
+import { MessageBox } from 'element-ui';
+
 export default {
   name: 'WelcomePage',
   data() {
@@ -84,9 +87,29 @@ export default {
     async submitForm() {
       this.$refs.form.validate(async (valid) => {
         if (valid) {
+
+          const dto = {
+           name: this.form.name,
+           email: this.form.email,
+           stream: this.form.stream,
+           knowledgeLevel: this.form.knowledgeLevel,
+           fpsId: this.form.fpsId
+         };
           try {
             console.log(this.form);
-            this.$router.push('/rating-page');
+            console.log(dto);
+            const response = await axios.post('http://localhost:8080/Verifie/verify-identity', dto);
+            if (response.status === 200) {
+              console.log("success");
+              this.$router.push('/rating-page'); // 成功时跳转到成功页面
+            } else {
+              MessageBox.alert('User Invalid', 'Error', {
+                  confirmButtonText: 'OK',
+                  showClose: false,
+                  type: 'warning'
+                });
+            }
+
           } catch (error) {
             console.error('There was an error!', error);
           }
