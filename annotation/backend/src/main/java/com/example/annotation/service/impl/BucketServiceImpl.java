@@ -14,7 +14,10 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.io.BufferedReader;
 
 @Service
 public class BucketServiceImpl implements BucketService {
@@ -44,11 +47,20 @@ public class BucketServiceImpl implements BucketService {
         S3ObjectInputStream inputStream = s3Object.getObjectContent();
 
         StringBuilder content = new StringBuilder();
-        byte[] buffer = new byte[1024];
-        int bytesRead;
-        while ((bytesRead = inputStream.read(buffer)) != -1) {
-            content.append(new String(buffer, 0, bytesRead));
+//        byte[] buffer = new byte[1024];
+//        int bytesRead;
+//        while ((bytesRead = inputStream.read(buffer)) != -1) {
+//            content.append(new String(buffer, 0, bytesRead));
+//        }
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                content.append(line);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
         inputStream.close();
 
         FileVo fileVo = null;

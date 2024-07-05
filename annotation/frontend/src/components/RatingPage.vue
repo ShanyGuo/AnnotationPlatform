@@ -33,50 +33,60 @@
 </template>
 
 <script>
-//import axios from 'axios';
+import axios from 'axios';
 import { MessageBox } from 'element-ui';
 
 export default {
   data() {
     return {
-      stream: "Mandarin",
-      items: [
-               {
-                 "id": 1,
-                 "keywords": "中国",
-                 "corpus_category": "people's daily",
-                 "index": "6",
-                 "sentence": "维拉潘指出，中国是亚足联的重要成员，拥有众多的训练场地、有潜力的球员和执著的球迷。",
-                 "rating": -1
-               },
-               {
-                 "id": 1,
-                 "keywords": "中国",
-                 "corpus_category": "people's daily",
-                 "index": "6",
-                 "sentence": "维拉潘指出，中国是亚足联的重要成员，拥有众多的训练场地、有潜力的球员和执著的球迷。",
-                 "rating": -1
-               },
-               {
-                 "id": 1,
-                 "keywords": "中国",
-                 "corpus_category": "people's daily",
-                 "index": "6",
-                 "sentence": "维拉潘指出，中国是亚足联的重要成员，拥有众多的训练场地、有潜力的球员和执著的球迷。",
-                 "rating": -1
-               },
-               {
-                 "id": 10,
-                 "keywords": "有",
-                 "corpus_category": "weibo_covid",
-                 "index": "9",
-                 "sentence": "勤洗手，少摸脸，还有就是“错误的安全感”。",
-                 "rating": -1
-               }
-             ]
+      stream: "",
+      items: [],
     };
   },
+  mounted() {
+    this.fetchData(); // Call the fetchData method when the component is mounted
+  },
   methods: {
+    fetchData() {
+      const cachedData = localStorage.getItem('cachedData');
+      const cachedStream = localStorage.getItem('cachedStream');
+      if (cachedData) {
+        this.items = JSON.parse(cachedData);
+        this.stream = cachedStream;
+      } else {
+        // Replace with your JSON file or API endpoint
+        const url = 'http://localhost:8080/bucket/downloadObj';
+
+        // Use axios to fetch data
+        axios.get(url)
+        .then(response => {
+          let fileName = response.data.fileName;
+          if (fileName.startsWith("mandarin_")) {
+            fileName = "Mandarin"
+          } else {
+            fileName = "Cantonese"
+          }
+
+          let fileContent = response.data.fileContent;
+            if (typeof fileContent === 'string') {
+              try {
+                fileContent = JSON.parse(fileContent);
+              } catch (error) {
+                console.error('Error parsing JSON:', error);
+                return; // Exit early if parsing fails
+              }
+            }
+            this.items = fileContent;
+            this.stream = fileName;
+            localStorage.setItem('cachedData', JSON.stringify(fileContent));
+            localStorage.setItem('cachedStream', fileName);
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        });
+      }
+
+    },
     submitRatings() {
       const invalidItems = this.items.filter(item => item.rating === -1);
         if (invalidItems.length > 0) {

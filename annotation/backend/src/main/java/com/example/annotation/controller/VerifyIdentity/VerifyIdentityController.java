@@ -22,13 +22,13 @@ public class VerifyIdentityController {
         // 处理接收到的数据
         //System.out.println("Received Data: " + dto.getName() + ", " + dto.getIdNumber());
         String name = dto.getName();
-        String email = dto.getEmail();
+        String fpsId = dto.getFpsId();
 
-        if (identityMap.containsKey(name) && identityMap.get(name).equals(email)) {
+        if (identityMap.containsKey(name) && identityMap.get(name).equals(fpsId)) {
             return ResponseEntity.status(409).body("Duplicate identity detected");
         }
 
-        identityMap.put(name, email);
+        identityMap.put(name, fpsId);
         return ResponseEntity.ok("Identity verified successfully");
     }
 }

@@ -11,10 +11,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/bucket")
+@CrossOrigin(origins = "http://localhost:8081")
 public class BucketController {
-
-    private static int accessCount = 0;
-    private static final int MAX_ACCESS_COUNT = 5;
+    private static int accessCount = 1;
+    private static final int MAX_ACCESS_COUNT = 50;
 
     @Autowired
     BucketService bucketService;
@@ -26,7 +26,10 @@ public class BucketController {
     }
 
     @GetMapping("/downloadObj")
-    public ResponseEntity<FileVo> downloadObject(@RequestParam("bucketName") String bucketName, @RequestParam("objName") String objName) throws Exception {
+    public ResponseEntity<FileVo> downloadObject() throws Exception {
+        String bucketName = "mandarin-source-files";
+        String objName = "mandarin_annotator_assignments/mandarin_" + accessCount + ".json";
+
         if (accessCount >= MAX_ACCESS_COUNT) {
             FileVo end =  new FileVo("end", "Access limit reached. This endpoint can only be accessed 10 times.");
             return ResponseEntity.status(403).body(end);
