@@ -40,6 +40,7 @@ export default {
   data() {
     return {
       stream: "",
+      fileName: "",
       items: [],
     };
   },
@@ -60,11 +61,12 @@ export default {
         // Use axios to fetch data
         axios.get(url)
         .then(response => {
-          let fileName = response.data.fileName;
-          if (fileName.startsWith("mandarin_")) {
-            fileName = "Mandarin"
+          let fName = response.data.fileName;
+          this.fileName = fName;
+          if (fName.startsWith("mandarin_")) {
+            this.stream = "Mandarin";
           } else {
-            fileName = "Cantonese"
+            this.stream = "Cantonese";
           }
 
           let fileContent = response.data.fileContent;
@@ -77,9 +79,8 @@ export default {
               }
             }
             this.items = fileContent;
-            this.stream = fileName;
             localStorage.setItem('cachedData', JSON.stringify(fileContent));
-            localStorage.setItem('cachedStream', fileName);
+            localStorage.setItem('cachedStream', this.stream);
         })
         .catch(error => {
           console.error('Error fetching data:', error);
@@ -97,8 +98,29 @@ export default {
           });
           return;
         } else {
-            console.log(this.items);
-            this.$router.push('/thank-you')
+          const cachedUserName = localStorage.getItem('cachedUserName');
+          const cachedFpsId = localStorage.getItem('cachedFpsId');
+          const dto = {
+            userName: cachedUserName,
+            fpsId: cachedFpsId,
+            fileName: this.fileName,
+            fileContent: this.items,
+          };
+          console.log(dto);
+          axios.post('http://localhost:8080/bucket/uploadObj', dto)
+            .then(response => {
+                if (response.status === 200) {
+                  console.log("success");
+                  this.$router.push('/thank-you')
+                } else {
+                  MessageBox.alert('User Invalid', 'Error', {
+                    confirmButtonText: 'OK',
+                    showClose: false,
+                    type: 'warning'
+                  });
+                }
+            })
+
         }
     }
   }

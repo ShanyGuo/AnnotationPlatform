@@ -46,6 +46,8 @@ export default {
   name: 'WelcomePage',
   data() {
     return {
+      userName: '',
+      fpsId: '',
       form: {
         name: '',
         email: '',
@@ -101,6 +103,8 @@ export default {
             const response = await axios.post('http://localhost:8080/Verifie/verify-identity', dto);
             if (response.status === 200) {
               console.log("success");
+              localStorage.setItem('cachedUserName', this.form.name);
+              localStorage.setItem('cachedFpsId', this.form.fpsId);
               this.$router.push('/rating-page'); // 成功时跳转到成功页面
             } else {
               MessageBox.alert('User Invalid', 'Error', {
